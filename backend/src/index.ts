@@ -3,6 +3,7 @@ import cors from 'cors';
 import { initDB } from './database';
 import authRoutes from './routes/authRoutes';
 import movieRoutes from './routes/movieRoutes';
+import friendRoutes from './routes/friendRoutes';
 
 const app = express();
 const PORT = 5000;
@@ -10,16 +11,14 @@ const PORT = 5000;
 app.use(cors());
 app.use(express.json());
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);
+app.use('/api/friends', friendRoutes);
 
-// Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'OK' });
 });
 
-// Запуск сервера
 const startServer = async () => {
   await initDB();
   app.listen(PORT, () => {
