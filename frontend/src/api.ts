@@ -29,4 +29,7 @@ export const rateMovie = (movieId: number, rating: number) =>
 
 export const getRecommendations = () => api.get('/movies/recommendations');
 
+// Получить гибридные рекомендации
+export const getHybridRecommendations = () => api.get('/movies/recommendations/hybrid');
+
 export default api;
