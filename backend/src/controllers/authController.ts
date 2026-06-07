@@ -60,3 +60,26 @@ export const getMe = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Ошибка при получении профиля' });
   }
 };
+
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const { bio, avatar_url } = req.body;
+    const db = await openDB();
+    
+    await db.run(
+      'UPDATE users SET bio = COALESCE(?, bio), avatar_url = COALESCE(?, avatar_url), updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+      [bio, avatar_url, userId]
+    );
+    
+    const user = await db.get(
+      'SELECT id, email, username, bio, avatar_url, created_at FROM users WHERE id = ?',
+      [userId]
+    );
+    
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ошибка при обновлении профиля' });
+  }
+};

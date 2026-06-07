@@ -1,52 +1,102 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMovies, rateMovie } from '../api';
+import api from '../services/api';
+
+interface Movie {
+  id: number;
+  title: string;
+  genre: string;
+  year: number;
+  poster_url?: string;
+  avg_rating: number;
+  ratings_count: number;
+}
 
 const MovieList: React.FC = () => {
-  const [movies, setMovies] = useState<any[]>([]);
-  const [ratings, setRatings] = useState<Record<number, number>>({});
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userRatings, setUserRatings] = useState<Record<number, number>>({});
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchMovies = async () => {
-      const response = await getMovies();
-      setMovies(response.data);
-    };
     fetchMovies();
+    fetchUserRatings();
   }, []);
 
-  const handleRate = async (movieId: number, rating: number) => {
-    await rateMovie(movieId, rating);
-    setRatings({ ...ratings, [movieId]: rating });
+  const fetchMovies = async () => {
+    try {
+      const res = await api.get('/movies');
+      setMovies(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const fetchUserRatings = async () => {
+    try {
+      const res = await api.get('/user/ratings');
+      const ratingsMap: Record<number, number> = {};
+      res.data.forEach((r: any) => {
+        ratingsMap[r.movie_id] = r.rating;
+      });
+      setUserRatings(ratingsMap);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const rateMovie = async (movieId: number, rating: number, e: React.MouseEvent) => {
+    e.stopPropagation(); // чтобы не открывалась страница фильма
+    try {
+      await api.post('/movies/rate', { movieId, rating });
+      setUserRatings({ ...userRatings, [movieId]: rating });
+      fetchMovies();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const openMovie = (movieId: number) => {
+    navigate(`/movies/${movieId}`);
+  };
+
+  if (loading) return <div className="form-container">Загрузка фильмов...</div>;
+
   return (
-    <div style={{ maxWidth: 800, margin: '50px auto', padding: 20 }}>
+    <div>
       <h2>Каталог фильмов</h2>
-      <button onClick={() => navigate('/profile')} style={{ marginBottom: 20 }}>Назад в профиль</button>
-      <div>
+      <div className="movies-grid">
         {movies.map((movie) => (
-          <div key={movie.id} style={{ border: '1px solid #ccc', padding: 15, marginBottom: 10, borderRadius: 8 }}>
-            <h3>{movie.title}</h3>
-            <p>Жанр: {movie.genre} | Год: {movie.year}</p>
-            <div>
-              <strong>Оценка: </strong>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  onClick={() => handleRate(movie.id, star)}
-                  style={{
-                    margin: '0 3px',
-                    padding: '5px 10px',
-                    backgroundColor: (ratings[movie.id] === star || movie.userRating === star) ? '#ffc107' : '#e9ecef',
-                    border: 'none',
-                    borderRadius: 4,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {star}
-                </button>
-              ))}
+          <div key={movie.id} className="movie-card" onClick={() => openMovie(movie.id)}>
+            <div className="movie-card__poster">
+              {movie.poster_url ? (
+                <img src={movie.poster_url} alt={movie.title} />
+              ) : (
+                <div style={{ background: '#333', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  🎬
+                </div>
+              )}
+            </div>
+            <div className="movie-card__info">
+              <h3 className="movie-card__title">{movie.title}</h3>
+              <p className="movie-card__year">{movie.genre} • {movie.year}</p>
+              <div className="movie-card__rating">
+                <span>⭐ {movie.avg_rating?.toFixed(1) || '0'}</span>
+                <span>({movie.ratings_count || 0} оценок)</span>
+              </div>
+              <div className="movie-card__rate" onClick={(e) => e.stopPropagation()}>
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={(e) => rateMovie(movie.id, star, e)}
+                    className={userRatings[movie.id] === star ? 'active' : ''}
+                  >
+                    {star}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         ))}

@@ -1,49 +1,57 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { login } from '../api';
+import api from '../services/api';
+import { useAuth } from '../hooks/useAuth';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
     try {
-      const response = await login(email, password);
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      const response = await api.post('/auth/login', { email, password });
+      const { token, user } = response.data;
+      login(token, user);
       navigate('/profile');
-    } catch (err) {
-      setError('Неверный email или пароль');
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Ошибка при входе');
     }
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '50px auto', padding: 20 }}>
+    <div className="form-container">
       <h2>Вход</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <div className="error">{error}</div>}
       <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ width: '100%', padding: 8, marginBottom: 10 }}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Пароль"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ width: '100%', padding: 8, marginBottom: 10 }}
-          required
-        />
-        <button type="submit" style={{ padding: '10px 20px' }}>Войти</button>
+        <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Пароль</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Войти</button>
       </form>
-      <button onClick={() => navigate('/register')} style={{ marginTop: 10 }}>Нет аккаунта? Зарегистрироваться</button>
+      <button onClick={() => navigate('/register')} className="secondary">
+        Нет аккаунта? Зарегистрироваться
+      </button>
     </div>
   );
 };

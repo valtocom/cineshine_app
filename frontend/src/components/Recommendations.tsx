@@ -1,71 +1,73 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getHybridRecommendations } from '../api';
+import api from '../services/api';
 
 interface Movie {
   id: number;
   title: string;
   genre: string;
   year: number;
+  poster_url?: string;
   avg_rating: number;
-  rating_count?: number;
-  weighted_score?: number;
-  genre_match?: number;
 }
 
 const Recommendations: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
-      try {
-        setLoading(true);
-        const response = await getHybridRecommendations();
-        setMovies(response.data);
-        setError('');
-      } catch (err) {
-        setError('Ошибка при загрузке рекомендаций');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchRecommendations();
   }, []);
 
-  if (loading) return <div style={{ textAlign: 'center', marginTop: 50 }}>Загрузка рекомендаций...</div>;
-  if (error) return <div style={{ textAlign: 'center', marginTop: 50, color: 'red' }}>{error}</div>;
+  const fetchRecommendations = async () => {
+    try {
+      const res = await api.get('/recommendations/hybrid');
+      setMovies(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <div className="loading-spinner"></div>;
 
   return (
-    <div style={{ maxWidth: 1200, margin: '50px auto', padding: 20 }}>
-      <h2>🔥 Гибридные рекомендации для вас</h2>
-      <p style={{ color: '#666', marginBottom: 20 }}>
-        Рекомендации основаны на оценках ваших друзей, ваших любимых жанрах и мнении похожих пользователей
-      </p>
-      <button onClick={() => navigate('/profile')} style={{ marginBottom: 20, padding: '8px 16px', cursor: 'pointer' }}>
-        ← Назад в профиль
-      </button>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 20 }}>
-        {movies.map((movie) => (
-          <div key={movie.id} style={{ border: '1px solid #e0e0e0', borderRadius: 12, padding: 16, backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ marginBottom: 8, fontSize: 18 }}>{movie.title}</h3>
-            <p style={{ color: '#666', marginBottom: 8 }}>{movie.genre} · {movie.year}</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <span style={{ fontSize: 20, fontWeight: 'bold', color: '#f5c518' }}>
-                ⭐ {movie.avg_rating ? movie.avg_rating.toFixed(1) : 'Нет оценок'}
-              </span>
-              {movie.weighted_score && (
-                <span style={{ fontSize: 14, color: '#888' }}>
-                  вес: {movie.weighted_score.toFixed(2)}
-                </span>
-              )}
+    <div>
+      <h2>🔥 Рекомендации для вас</h2>
+      <p className="subtitle">На основе ваших оценок и предпочтений друзей</p>
+      
+      {movies.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🎬</div>
+          <p>Поставьте оценки фильмам, чтобы получить рекомендации</p>
+          <button onClick={() => navigate('/movies')} className="primary-btn">
+            Оценить фильмы
+          </button>
+        </div>
+      ) : (
+        <div className="movies-grid">
+          {movies.map((movie) => (
+            <div key={movie.id} className="movie-card" onClick={() => navigate(`/movies/${movie.id}`)}>
+              <div className="movie-card__poster">
+                {movie.poster_url ? (
+                  <img src={movie.poster_url} alt={movie.title} />
+                ) : (
+                  <div className="poster-placeholder">🎬</div>
+                )}
+              </div>
+              <div className="movie-card__info">
+                <h3 className="movie-card__title">{movie.title}</h3>
+                <p className="movie-card__year">{movie.genre} • {movie.year}</p>
+                <div className="movie-card__rating">
+                  <span>⭐ {movie.avg_rating?.toFixed(1) || '0'}</span>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

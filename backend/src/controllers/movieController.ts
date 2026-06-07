@@ -1,43 +1,93 @@
 import { Request, Response } from 'express';
 import { openDB } from '../database';
 
+// Получить все фильмы
 export const getMovies = async (req: Request, res: Response) => {
   try {
     const db = await openDB();
     const movies = await db.all('SELECT * FROM movies ORDER BY year DESC');
     res.json(movies);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Ошибка при получении фильмов' });
   }
 };
 
+// Получить один фильм по ID
+export const getMovieById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const db = await openDB();
+    const movie = await db.get('SELECT * FROM movies WHERE id = ?', [id]);
+    
+    if (!movie) {
+      return res.status(404).json({ error: 'Фильм не найден' });
+    }
+    
+    res.json(movie);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ошибка при получении фильма' });
+  }
+};
+
+// Получить оценку пользователя для фильма
+export const getUserRating = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const { id } = req.params;
+    const db = await openDB();
+    
+    const rating = await db.get(
+      'SELECT rating FROM user_ratings WHERE user_id = ? AND movie_id = ?',
+      [userId, id]
+    );
+    
+    res.json({ rating: rating?.rating || 0 });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ошибка при получении оценки' });
+  }
+};
+
+// Оценить фильм
 export const rateMovie = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     const { movieId, rating } = req.body;
     const db = await openDB();
     
+    // Сохраняем или обновляем оценку
     await db.run(
       `INSERT INTO user_ratings (user_id, movie_id, rating) 
        VALUES (?, ?, ?) 
-       ON CONFLICT DO UPDATE SET rating = ?`,
+       ON CONFLICT(user_id, movie_id) DO UPDATE SET rating = ?`,
       [userId, movieId, rating, rating]
+    );
+    
+    // Обновляем средний рейтинг фильма
+    const avgResult = await db.get(
+      'SELECT AVG(rating) as avg_rating, COUNT(*) as count FROM user_ratings WHERE movie_id = ?',
+      [movieId]
+    );
+    
+    await db.run(
+      'UPDATE movies SET avg_rating = ?, ratings_count = ? WHERE id = ?',
+      [avgResult.avg_rating || 0, avgResult.count || 0, movieId]
     );
     
     res.json({ success: true });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Ошибка при сохранении оценки' });
   }
 };
 
+// Простые рекомендации (коллаборативная фильтрация)
 export const getRecommendations = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     const db = await openDB();
-    
-    // Простейшая коллаборативная фильтрация:
-    // находим пользователей с похожими оценками
-    // и рекомендуем фильмы, которые они высоко оценили
     
     const recommendations = await db.all(`
       SELECT m.*, AVG(ur.rating) as avg_rating
@@ -53,19 +103,18 @@ export const getRecommendations = async (req: Request, res: Response) => {
     `, [userId]);
     
     if (recommendations.length === 0) {
-      // Если рекомендаций нет - показываем фильмы с высоким средним рейтингом
       const fallback = await db.all(`
-        SELECT * FROM movies ORDER BY rating DESC LIMIT 10
+        SELECT * FROM movies ORDER BY avg_rating DESC LIMIT 10
       `);
       res.json(fallback);
     } else {
       res.json(recommendations);
     }
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Ошибка при получении рекомендаций' });
   }
 };
-
 
 // Гибридные рекомендации (коллаборативная + контентная + друзья)
 export const getHybridRecommendations = async (req: Request, res: Response) => {
@@ -73,7 +122,7 @@ export const getHybridRecommendations = async (req: Request, res: Response) => {
     const userId = (req as any).userId;
     const db = await openDB();
     
-    // 1. Получаем любимые жанры пользователя (фильмы с оценкой 4 или 5)
+    // 1. Получаем любимые жанры пользователя
     const favoriteGenres = await db.all(`
       SELECT DISTINCT m.genre
       FROM user_ratings ur
@@ -90,11 +139,11 @@ export const getHybridRecommendations = async (req: Request, res: Response) => {
     
     const friendIds = friends.map(f => f.friend_id);
     
-    let recommendations = [];
+    let recommendations: any[] = [];
     
-    // 3. Если есть друзья - рекомендации от друзей (с повышенным весом)
+    // 3. Рекомендации от друзей (с повышенным весом)
     if (friendIds.length > 0) {
-      const friendPlaceholders = friendIds.map(() => '?').join(',');
+      const placeholders = friendIds.map(() => '?').join(',');
       recommendations = await db.all(`
         SELECT 
           m.*, 
@@ -103,7 +152,7 @@ export const getHybridRecommendations = async (req: Request, res: Response) => {
           (AVG(ur.rating) * 1.2) as weighted_score
         FROM movies m
         JOIN user_ratings ur ON ur.movie_id = m.id
-        WHERE ur.user_id IN (${friendPlaceholders})
+        WHERE ur.user_id IN (${placeholders})
         AND ur.movie_id NOT IN (
           SELECT movie_id FROM user_ratings WHERE user_id = ?
         )
@@ -113,12 +162,12 @@ export const getHybridRecommendations = async (req: Request, res: Response) => {
       `, [...friendIds, userId]);
     }
     
-    // 4. Если рекомендаций от друзей меньше 5 - дополняем контентными по жанрам
+    // 4. Дополняем контентными рекомендациями по жанрам
     if (recommendations.length < 5 && genreList.length > 0) {
-      const genrePlaceholders = genreList.map(() => '?').join(',');
+      const placeholders = genreList.map(() => '?').join(',');
       const contentBased = await db.all(`
         SELECT m.*, 
-          CASE WHEN m.genre IN (${genrePlaceholders}) THEN 1 ELSE 0 END as genre_match
+          CASE WHEN m.genre IN (${placeholders}) THEN 1 ELSE 0 END as genre_match
         FROM movies m
         WHERE m.id NOT IN (
           SELECT movie_id FROM user_ratings WHERE user_id = ?
@@ -130,14 +179,14 @@ export const getHybridRecommendations = async (req: Request, res: Response) => {
       recommendations = [...recommendations, ...contentBased];
     }
     
-    // 5. Если рекомендаций всё ещё нет - fallback: топ фильмы по рейтингу
+    // 5. Fallback: топ фильмы по рейтингу
     if (recommendations.length === 0) {
       recommendations = await db.all(`
         SELECT * FROM movies ORDER BY avg_rating DESC LIMIT 10
       `);
     }
     
-    // Убираем дубликаты (по id)
+    // Убираем дубликаты
     const unique = recommendations.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
     
     res.json(unique.slice(0, 10));
