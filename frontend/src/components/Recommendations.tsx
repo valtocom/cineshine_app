@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import './Recommendations.css';
 
 interface Movie {
   id: number;
@@ -9,6 +10,7 @@ interface Movie {
   year: number;
   poster_url?: string;
   avg_rating: number;
+  ratings_count: number;
 }
 
 const Recommendations: React.FC = () => {
@@ -22,8 +24,8 @@ const Recommendations: React.FC = () => {
 
   const fetchRecommendations = async () => {
     try {
-      const res = await api.get('/recommendations/hybrid');
-      setMovies(res.data);
+      const response = await api.get('/recommendations/hybrid');
+      setMovies(response.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -34,20 +36,23 @@ const Recommendations: React.FC = () => {
   if (loading) return <div className="loading-spinner"></div>;
 
   return (
-    <div>
-      <h2>🔥 Рекомендации для вас</h2>
-      <p className="subtitle">На основе ваших оценок и предпочтений друзей</p>
-      
+    <div className="recommendations-page">
+      <div className="recommendations-header">
+        <h2>Рекомендации для вас</h2>
+        <p className="recommendations-subtitle">
+          Фильмы, подобранные на основе ваших оценок и предпочтений друзей
+        </p>
+      </div>
+
       {movies.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">🎬</div>
-          <p>Поставьте оценки фильмам, чтобы получить рекомендации</p>
+          <p>Поставьте оценки фильмам, чтобы получить персональные рекомендации</p>
           <button onClick={() => navigate('/movies')} className="primary-btn">
             Оценить фильмы
           </button>
         </div>
       ) : (
-        <div className="movies-grid">
+        <div className="recommendations-grid">
           {movies.map((movie) => (
             <div key={movie.id} className="movie-card" onClick={() => navigate(`/movies/${movie.id}`)}>
               <div className="movie-card__poster">
@@ -61,7 +66,8 @@ const Recommendations: React.FC = () => {
                 <h3 className="movie-card__title">{movie.title}</h3>
                 <p className="movie-card__year">{movie.genre} • {movie.year}</p>
                 <div className="movie-card__rating">
-                  <span>⭐ {movie.avg_rating?.toFixed(1) || '0'}</span>
+                  <span className="rating-stars">⭐ {movie.avg_rating?.toFixed(1) || '0'}</span>
+                  <span className="rating-count">({movie.ratings_count})</span>
                 </div>
               </div>
             </div>

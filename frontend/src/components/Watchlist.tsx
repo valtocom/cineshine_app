@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import './Watchlist.css';
 
 interface WatchlistItem {
   id: number;
@@ -7,12 +9,13 @@ interface WatchlistItem {
   title: string;
   year: number;
   poster_url?: string;
+  added_at: string;
 }
 
 const Watchlist: React.FC = () => {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchWatchlist();
@@ -23,7 +26,7 @@ const Watchlist: React.FC = () => {
       const response = await api.get('/watchlist');
       setWatchlist(response.data);
     } catch (err) {
-      setError('Ошибка при загрузке списка');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -34,29 +37,59 @@ const Watchlist: React.FC = () => {
       await api.delete(`/watchlist/${movieId}`);
       setWatchlist(watchlist.filter(item => item.movie_id !== movieId));
     } catch (err) {
-      setError('Ошибка при удалении');
+      console.error(err);
     }
   };
 
-  if (loading) return <div>Загрузка...</div>;
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long'
+    });
+  };
+
+  if (loading) return <div className="loading-spinner"></div>;
 
   return (
-    <div>
-      <h2>Буду смотреть</h2>
-      {error && <div className="error">{error}</div>}
+    <div className="watchlist-page">
+      <div className="watchlist-header">
+        <h2>Буду смотреть</h2>
+        <p className="watchlist-subtitle">Фильмы, которые вы планируете посмотреть</p>
+      </div>
+
       {watchlist.length === 0 ? (
-        <p>Список пуст. Добавьте фильмы из каталога!</p>
+        <div className="empty-state">
+          <p>Список пуст</p>
+          <button onClick={() => navigate('/movies')} className="primary-btn">
+            Перейти к фильмам
+          </button>
+        </div>
       ) : (
-        <div className="watchlist-list">
+        <div className="watchlist-grid">
           {watchlist.map((item) => (
-            <div key={item.id} className="watchlist-item">
-              <div>
-                <h3>{item.title}</h3>
-                <p>{item.year}</p>
+            <div key={item.id} className="watchlist-card" onClick={() => navigate(`/movies/${item.movie_id}`)}>
+              <div className="watchlist-card__poster">
+                {item.poster_url ? (
+                  <img src={item.poster_url} alt={item.title} />
+                ) : (
+                  <div className="poster-placeholder">🎬</div>
+                )}
               </div>
-              <button onClick={() => removeFromWatchlist(item.movie_id)} className="secondary">
-                Удалить
-              </button>
+              <div className="watchlist-card__info">
+                <h3 className="watchlist-card__title">{item.title}</h3>
+                <p className="watchlist-card__year">{item.year}</p>
+                <p className="watchlist-card__date">Добавлен: {formatDate(item.added_at)}</p>
+                <button
+                  className="remove-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFromWatchlist(item.movie_id);
+                  }}
+                >
+                  Удалить
+                </button>
+              </div>
             </div>
           ))}
         </div>

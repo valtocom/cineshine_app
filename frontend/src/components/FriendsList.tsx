@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import './Friends.css';
 
 interface Friend {
   id: number;
@@ -18,8 +19,8 @@ const FriendsList: React.FC = () => {
 
   const fetchFriends = async () => {
     try {
-      const res = await api.get('/friends');
-      setFriends(res.data);
+      const response = await api.get('/friends');
+      setFriends(response.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -39,12 +40,14 @@ const FriendsList: React.FC = () => {
   if (loading) return <div className="loading-spinner"></div>;
 
   return (
-    <div>
-      <h2>👥 Мои друзья</h2>
-      
+    <div className="friends-page">
+      <div className="friends-header">
+        <h2>Мои друзья</h2>
+        <p className="friends-subtitle">Здесь отображаются ваши друзья</p>
+      </div>
+
       {friends.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-icon">👋</div>
           <p>У вас пока нет друзей</p>
           <button onClick={() => window.location.href = '/users/search'} className="primary-btn">
             Найти друзей
@@ -57,7 +60,7 @@ const FriendsList: React.FC = () => {
               <div className="friend-info">
                 <div className="friend-avatar">
                   <img 
-                    src={friend.avatar_url || `https://ui-avatars.com/api/?background=e50914&color=fff&name=${encodeURIComponent(friend.username)}`} 
+                    src={friend.avatar_url || `https://ui-avatars.com/api/?background=f5c518&color=000&name=${encodeURIComponent(friend.username)}`} 
                     alt={friend.username}
                   />
                 </div>
@@ -66,7 +69,9 @@ const FriendsList: React.FC = () => {
                   <p>{friend.email}</p>
                 </div>
               </div>
-              <button onClick={() => removeFriend(friend.id)} className="danger-btn">Удалить</button>
+              <button onClick={() => removeFriend(friend.id)} className="remove-btn">
+                Удалить
+              </button>
             </div>
           ))}
         </div>

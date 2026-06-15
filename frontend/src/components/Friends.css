@@ -1,0 +1,171 @@
+.friends-page {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.friends-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.friends-header h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.friends-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.friends-list,
+.requests-list,
+.users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.friend-card,
+.request-card,
+.user-card {
+  background: var(--bg-elevated);
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 0.5px solid var(--border);
+  transition: var(--transition);
+}
+
+.friend-card:hover,
+.user-card:hover {
+  border-color: var(--accent);
+}
+
+.friend-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.friend-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.friend-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.friend-info h3 {
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.friend-info p {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.remove-btn,
+.decline-btn {
+  background: transparent;
+  border: 0.5px solid #ff3b30;
+  color: #ff3b30;
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.remove-btn:hover,
+.decline-btn:hover {
+  background: #ff3b30;
+  color: #fff;
+}
+
+.accept-btn,
+.add-btn {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.accept-btn:hover,
+.add-btn:hover {
+  background: var(--accent-hover);
+}
+
+.request-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.search-container {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+
+.search-input {
+  flex: 1;
+  max-width: 400px;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.search-btn {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  width: auto;
+}
+
+.search-message {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: var(--radius-md);
+  background: rgba(245, 197, 24, 0.1);
+  color: var(--accent);
+}
+
+@media (max-width: 600px) {
+  .friend-card,
+  .request-card,
+  .user-card {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+  
+  .friend-info {
+    flex-direction: column;
+  }
+  
+  .request-actions {
+    justify-content: center;
+  }
+}

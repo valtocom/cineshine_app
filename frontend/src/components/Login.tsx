@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../hooks/useAuth';
+import './Login.css';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');

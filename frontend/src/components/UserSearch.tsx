@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import api from '../services/api';
+import './Friends.css';
 
 interface User {
   id: number;
@@ -11,18 +12,20 @@ const UserSearch: React.FC = () => {
   const [query, setQuery] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [message, setMessage] = useState('');
 
   const searchUsers = async () => {
     if (!query.trim()) return;
     setLoading(true);
-    setError('');
+    setMessage('');
     try {
       const response = await api.get(`/users/search?q=${query}`);
       setUsers(response.data);
+      if (response.data.length === 0) {
+        setMessage('Пользователи не найдены');
+      }
     } catch (err) {
-      setError('Ошибка при поиске');
+      setMessage('Ошибка при поиске');
     } finally {
       setLoading(false);
     }
@@ -31,37 +34,52 @@ const UserSearch: React.FC = () => {
   const sendFriendRequest = async (userId: number) => {
     try {
       await api.post('/friends/request', { friendId: userId });
-      setSuccess('Заявка отправлена!');
-      setTimeout(() => setSuccess(''), 3000);
+      setMessage('Заявка отправлена!');
+      setTimeout(() => setMessage(''), 3000);
     } catch (err) {
-      setError('Ошибка при отправке заявки');
+      setMessage('Ошибка при отправке заявки');
     }
   };
 
   return (
-    <div>
-      <h2>Поиск пользователей</h2>
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+    <div className="friends-page">
+      <div className="friends-header">
+        <h2>Поиск пользователей</h2>
+        <p className="friends-subtitle">Найдите друзей по имени</p>
+      </div>
+
+      <div className="search-container">
         <input
           type="text"
           placeholder="Введите имя пользователя"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && searchUsers()}
+          className="search-input"
         />
-        <button onClick={searchUsers}>Найти</button>
+        <button onClick={searchUsers} className="search-btn">Найти</button>
       </div>
-      {error && <div className="error">{error}</div>}
-      {success && <div className="success">{success}</div>}
-      {loading && <div>Поиск...</div>}
+
+      {message && <div className="search-message">{message}</div>}
+
+      {loading && <div className="loading-spinner"></div>}
+
       <div className="users-list">
         {users.map((user) => (
           <div key={user.id} className="user-card">
-            <div>
-              <h3>{user.username}</h3>
-              <p>{user.email}</p>
+            <div className="friend-info">
+              <div className="friend-avatar">
+                <img 
+                  src={`https://ui-avatars.com/api/?background=f5c518&color=000&name=${encodeURIComponent(user.username)}`} 
+                  alt={user.username}
+                />
+              </div>
+              <div>
+                <h3>{user.username}</h3>
+                <p>{user.email}</p>
+              </div>
             </div>
-            <button onClick={() => sendFriendRequest(user.id)}>
+            <button onClick={() => sendFriendRequest(user.id)} className="add-btn">
               Добавить в друзья
             </button>
           </div>

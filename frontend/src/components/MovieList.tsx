@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import './MovieList.css';
 
 interface Movie {
   id: number;
@@ -48,7 +49,7 @@ const MovieList: React.FC = () => {
   };
 
   const rateMovie = async (movieId: number, rating: number, e: React.MouseEvent) => {
-    e.stopPropagation(); // чтобы не открывалась страница фильма
+    e.stopPropagation();
     try {
       await api.post('/movies/rate', { movieId, rating });
       setUserRatings({ ...userRatings, [movieId]: rating });
@@ -62,11 +63,15 @@ const MovieList: React.FC = () => {
     navigate(`/movies/${movieId}`);
   };
 
-  if (loading) return <div className="form-container">Загрузка фильмов...</div>;
+  if (loading) return <div className="loading-spinner"></div>;
 
   return (
-    <div>
-      <h2>Каталог фильмов</h2>
+    <div className="movies-page">
+      <div className="movies-header">
+        <h2>Фильмы</h2>
+        <p className="movies-subtitle">Открывай и оценивай любимое кино</p>
+      </div>
+
       <div className="movies-grid">
         {movies.map((movie) => (
           <div key={movie.id} className="movie-card" onClick={() => openMovie(movie.id)}>
@@ -74,24 +79,22 @@ const MovieList: React.FC = () => {
               {movie.poster_url ? (
                 <img src={movie.poster_url} alt={movie.title} />
               ) : (
-                <div style={{ background: '#333', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  🎬
-                </div>
+                <span>🎬</span>
               )}
             </div>
             <div className="movie-card__info">
-              <h3 className="movie-card__title">{movie.title}</h3>
-              <p className="movie-card__year">{movie.genre} • {movie.year}</p>
-              <div className="movie-card__rating">
-                <span>⭐ {movie.avg_rating?.toFixed(1) || '0'}</span>
-                <span>({movie.ratings_count || 0} оценок)</span>
+              <div className="movie-card__title">{movie.title}</div>
+              <div className="movie-card__year">{movie.genre} • {movie.year}</div>
+              <div className="movie-card__rating-row">
+                <span className="rating-stars">⭐ {movie.avg_rating?.toFixed(1) || '0'}</span>
+                <span className="rating-count">({movie.ratings_count})</span>
               </div>
               <div className="movie-card__rate" onClick={(e) => e.stopPropagation()}>
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
+                    className={`rate-btn ${userRatings[movie.id] === star ? 'active' : ''}`}
                     onClick={(e) => rateMovie(movie.id, star, e)}
-                    className={userRatings[movie.id] === star ? 'active' : ''}
                   >
                     {star}
                   </button>
