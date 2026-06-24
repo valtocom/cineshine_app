@@ -5,251 +5,189 @@
   right: 0;
   background: rgba(0, 0, 0, 0.92);
   backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 0.5px solid var(--border);
-  padding: 0.75rem 1.5rem;
+  padding: 0 clamp(0.75rem, 2vw, 1.5rem);
   z-index: 1000;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 60px; /* Фиксированная высота */
+  height: 80px;
   box-sizing: border-box;
 }
 
+.navbar-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .navbar-brand {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  letter-spacing: -0.02em;
+  flex-shrink: 0;
+}
+
+.navbar-brand-logo {
+  height: 110px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .navbar-menu {
   display: flex;
-  gap: 1.5rem;
+  gap: clamp(0.5rem, 1.5vw, 1.5rem);
   align-items: center;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
 }
 
-.navbar-menu a {
+.navbar-menu a,
+.navbar-menu button {
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: clamp(0.65rem, 1.5vw, 0.85rem);
   font-weight: 500;
   transition: var(--transition);
+  white-space: nowrap;
+  padding: 0.25rem 0.1rem;
 }
 
-.navbar-menu a:hover {
+.navbar-menu a:hover,
+.navbar-menu button:hover {
   color: var(--accent);
 }
 
 .navbar-menu button {
   background: none;
   border: none;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  font-family: inherit;
 }
 
-.navbar-menu button:hover {
-  color: var(--accent);
-}
-
-/* ОБНОВЛЁННЫЙ КОД ДЛЯ СТРАНИЦЫ С ФИЛЬМАМИ */
-.movies-page {
-  width: 100%;
-  min-height: 100vh;
-  display: flex;
+/* Бургер-кнопка */
+.burger-btn {
+  display: none;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding-top: 100px; /* Отступ под фиксированный navbar (60px высота + 40px отступ) */
-  padding-bottom: 40px;
-  box-sizing: border-box;
-}
-
-.movies-header {
-  text-align: center;
-  margin-bottom: 40px;
-  width: 100%;
-}
-
-.movies-header h2 {
-  font-size: 2rem;
-  margin-bottom: 8px;
-}
-
-.movies-subtitle {
-  color: var(--text-secondary);
-}
-
-.movies-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 32px;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 16px;
-  box-sizing: border-box;
-}
-
-/* Магия для центрирования последнего ряда */
-.movies-grid::after {
-  content: "";
-  flex: auto;
-}
-
-.movie-card {
-  width: 220px;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  z-index: 1001;
   flex-shrink: 0;
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  cursor: pointer;
-  transition: var(--transition);
-  border: 0.5px solid var(--border);
 }
 
-.movie-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--accent);
-  box-shadow: var(--shadow-lg);
+.burger-line {
+  display: block;
+  width: 25px;
+  height: 2px;
+  background: var(--text-primary);
+  transition: all 0.3s ease;
+  border-radius: 2px;
 }
 
-.movie-card__poster {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  background: var(--bg-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+.burger-line.active:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
 }
 
-.movie-card__poster img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.burger-line.active:nth-child(2) {
+  opacity: 0;
 }
 
-.poster-placeholder {
-  font-size: 2rem;
-  opacity: 0.5;
+.burger-line.active:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
 }
 
-.movie-card__info {
-  padding: 14px;
-  text-align: center;
-}
+/* Адаптив для планшетов и мобильных */
+@media (max-width: 1024px) {
+  .burger-btn {
+    display: flex;
+  }
 
-.movie-card__title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-bottom: 4px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  .navbar-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 280px;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    transition: right 0.3s ease;
+    padding: 80px 20px 40px;
+    box-sizing: border-box;
+    border-left: 0.5px solid var(--border);
+    flex-shrink: 0;
+  }
 
-.movie-card__year {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
+  .navbar-menu.open {
+    right: 0;
+  }
 
-.movie-card__rating-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.75rem;
-  margin-bottom: 10px;
-}
+  .navbar-menu a,
+  .navbar-menu button {
+    font-size: 1.1rem;
+    padding: 8px 0;
+    white-space: nowrap;
+  }
 
-.rating-stars {
-  color: var(--accent);
-}
-
-.rating-count {
-  color: var(--text-muted);
-}
-
-.movie-card__rate {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-}
-
-.movie-card__rate button {
-  background: var(--bg-elevated);
-  border: 0.5px solid var(--border);
-  color: var(--text-secondary);
-  padding: 4px 8px;
-  border-radius: 20px;
-  font-size: 0.7rem;
-  cursor: pointer;
-  transition: var(--transition);
-  width: auto;
-  min-width: 32px;
-}
-
-.movie-card__rate button:hover {
-  background: var(--accent);
-  color: #000;
-}
-
-.movie-card__rate button.active {
-  background: var(--accent);
-  color: #000;
+  .navbar-menu button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 1.1rem;
+  }
 }
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 0.5rem 1rem;
-    height: 52px; /* Меньше высота на мобилках */
+    height: 70px;
   }
   
+  .navbar-brand-logo {
+    height: 90px;
+  }
+
   .navbar-menu {
-    gap: 0.75rem;
+    width: 260px;
   }
-  
+
   .navbar-menu a,
   .navbar-menu button {
-    font-size: 0.7rem;
-  }
-  
-  .movies-page {
-    padding-top: 82px; /* 52px navbar + 30px отступ */
-  }
-  
-  .movies-grid {
-    gap: 20px;
-    padding: 0 12px;
-  }
-  
-  .movie-card {
-    width: 180px;
+    font-size: 1rem;
   }
 }
 
 @media (max-width: 480px) {
   .navbar {
-    height: 48px; /* Ещё меньше на очень маленьких экранах */
+    height: 65px;
   }
   
-  .movies-page {
-    padding-top: 78px; /* 48px navbar + 30px отступ */
+  .navbar-brand-logo {
+    height: 75px;
   }
-  
-  .movies-grid {
-    gap: 16px;
-    padding: 0 8px;
+
+  .navbar-menu {
+    width: 240px;
+    gap: 18px;
   }
-  
-  .movie-card {
-    width: 150px;
+
+  .navbar-menu a,
+  .navbar-menu button {
+    font-size: 0.9rem;
   }
 }

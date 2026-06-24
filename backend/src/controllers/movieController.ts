@@ -50,6 +50,24 @@ export const getUserRating = async (req: Request, res: Response) => {
   }
 };
 
+// Получить все оценки текущего пользователя
+export const getUserRatings = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+    const db = await openDB();
+    
+    const ratings = await db.all(
+      'SELECT movie_id, rating FROM user_ratings WHERE user_id = ?',
+      [userId]
+    );
+    
+    res.json(ratings);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ошибка при получении оценок' });
+  }
+};
+
 // Оценить фильм
 export const rateMovie = async (req: Request, res: Response) => {
   try {

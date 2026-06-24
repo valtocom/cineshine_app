@@ -4,7 +4,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Profile from './components/Profile';
 import MovieList from './components/MovieList';
-import MovieDetail from './components/MovieDetail';  // ДОБАВИТЬ
+import MovieDetail from './components/MovieDetail';
 import Recommendations from './components/Recommendations';
 import FriendsList from './components/FriendsList';
 import FriendRequests from './components/FriendRequests';
@@ -27,22 +27,20 @@ const App: React.FC = () => {
     <BrowserRouter>
       <div className="app">
         {authenticated && <Navbar />}
-        <div className="container">
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-            <Route path="/movies" element={<PrivateRoute><MovieList /></PrivateRoute>} />
-            <Route path="/movies/:id" element={<PrivateRoute><MovieDetail /></PrivateRoute>} /> {/* ДОБАВИТЬ */}
-            <Route path="/recommendations" element={<PrivateRoute><Recommendations /></PrivateRoute>} />
-            <Route path="/friends" element={<PrivateRoute><FriendsList /></PrivateRoute>} />
-            <Route path="/friends/requests" element={<PrivateRoute><FriendRequests /></PrivateRoute>} />
-            <Route path="/feed" element={<PrivateRoute><Feed /></PrivateRoute>} />
-            <Route path="/watchlist" element={<PrivateRoute><Watchlist /></PrivateRoute>} />
-            <Route path="/users/search" element={<PrivateRoute><UserSearch /></PrivateRoute>} />
-            <Route path="/" element={<Navigate to="/movies" />} />
-          </Routes>
-        </div>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/movies" element={<PrivateRoute><MovieList /></PrivateRoute>} />
+          <Route path="/movies/:id" element={<PrivateRoute><MovieDetail /></PrivateRoute>} />
+          <Route path="/recommendations" element={<PrivateRoute><Recommendations /></PrivateRoute>} />
+          <Route path="/friends" element={<PrivateRoute><FriendsList /></PrivateRoute>} />
+          <Route path="/friends/requests" element={<PrivateRoute><FriendRequests /></PrivateRoute>} />
+          <Route path="/feed" element={<PrivateRoute><Feed /></PrivateRoute>} />
+          <Route path="/watchlist" element={<PrivateRoute><Watchlist /></PrivateRoute>} />
+          <Route path="/users/search" element={<PrivateRoute><UserSearch /></PrivateRoute>} />
+          <Route path="/" element={<Navigate to="/movies" />} />
+        </Routes>
       </div>
     </BrowserRouter>
   );

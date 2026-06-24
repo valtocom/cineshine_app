@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './Friends.css';
 
@@ -12,6 +13,7 @@ interface Friend {
 const FriendsList: React.FC = () => {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchFriends();
@@ -49,7 +51,7 @@ const FriendsList: React.FC = () => {
       {friends.length === 0 ? (
         <div className="empty-state">
           <p>У вас пока нет друзей</p>
-          <button onClick={() => window.location.href = '/users/search'} className="primary-btn">
+          <button onClick={() => navigate('/users/search')} className="primary-btn">
             Найти друзей
           </button>
         </div>

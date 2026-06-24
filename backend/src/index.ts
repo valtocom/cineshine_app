@@ -11,7 +11,7 @@ const app = express();
 const PORT = 5000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));  // ← Увеличили лимит до 10MB
 
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', movieRoutes);

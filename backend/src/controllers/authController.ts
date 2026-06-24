@@ -24,6 +24,7 @@ export const register = async (req: Request, res: Response) => {
     const token = jwt.sign({ id: result.lastID, email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: result.lastID, email, username } });
   } catch (error) {
+    console.error('Register error:', error);
     res.status(500).json({ error: 'Ошибка при регистрации' });
   }
 };
@@ -46,6 +47,7 @@ export const login = async (req: Request, res: Response) => {
     const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, user: { id: user.id, email: user.email, username: user.username } });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ error: 'Ошибка при входе' });
   }
 };
@@ -54,9 +56,15 @@ export const getMe = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).userId;
     const db = await openDB();
-    const user = await db.get('SELECT id, email, username FROM users WHERE id = ?', [userId]);
+    const user = await db.get('SELECT id, email, username, bio, avatar_url, created_at FROM users WHERE id = ?', [userId]);
+    
+    if (!user) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    
     res.json(user);
   } catch (error) {
+    console.error('Get me error:', error);
     res.status(500).json({ error: 'Ошибка при получении профиля' });
   }
 };
@@ -67,11 +75,19 @@ export const updateProfile = async (req: Request, res: Response) => {
     const { bio, avatar_url } = req.body;
     const db = await openDB();
     
+    // Проверяем, существует ли пользователь
+    const existingUser = await db.get('SELECT * FROM users WHERE id = ?', [userId]);
+    if (!existingUser) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
+    }
+    
+    // Обновляем профиль
     await db.run(
-      'UPDATE users SET bio = COALESCE(?, bio), avatar_url = COALESCE(?, avatar_url), updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [bio, avatar_url, userId]
+      'UPDATE users SET bio = ?, avatar_url = ? WHERE id = ?',
+      [bio || null, avatar_url || null, userId]
     );
     
+    // Получаем обновлённого пользователя
     const user = await db.get(
       'SELECT id, email, username, bio, avatar_url, created_at FROM users WHERE id = ?',
       [userId]
@@ -79,7 +95,7 @@ export const updateProfile = async (req: Request, res: Response) => {
     
     res.json(user);
   } catch (error) {
-    console.error(error);
+    console.error('Update profile error:', error);
     res.status(500).json({ error: 'Ошибка при обновлении профиля' });
   }
 };

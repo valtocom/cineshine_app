@@ -101,7 +101,7 @@ const MovieDetail: React.FC = () => {
 
         <div className="movie-info">
           <h1 className="movie-title">{movie.title}</h1>
-          <div className="movie-meta">{movie.genre} • {movie.year}</div>
+          <div className="movie-meta">{movie.genre}, {movie.year}</div>
 
           <div className="movie-rating-section">
             <div className="avg-rating">

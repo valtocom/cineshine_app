@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import './Profile.css';
@@ -18,6 +18,8 @@ const Profile: React.FC = () => {
   const [editing, setEditing] = useState(false);
   const [bio, setBio] = useState('');
   const [error, setError] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,6 +57,52 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Проверяем размер (макс 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Файл太大了, максимум 2MB');
+      return;
+    }
+
+    // Проверяем тип
+    if (!file.type.startsWith('image/')) {
+      setError('Можно загружать только изображения');
+      return;
+    }
+
+    setUploading(true);
+    setError('');
+
+    try {
+      // Конвертируем в base64
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        
+        const response = await api.put('/auth/profile', { 
+          bio, 
+          avatar_url: base64 
+        });
+        
+        setUser(response.data);
+        localStorage.setItem('user', JSON.stringify(response.data));
+        setUploading(false);
+      };
+      reader.onerror = () => {
+        setError('Ошибка при чтении файла');
+        setUploading(false);
+      };
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.error || 'Ошибка при загрузке аватара');
+      setUploading(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -69,9 +117,27 @@ const Profile: React.FC = () => {
 
   return (
     <div className="profile-page">
+      <button className="back-btn" onClick={() => navigate('/movies')}>
+        ← Назад к фильмам
+      </button>
+
       <div className="profile-header">
-        <div className="profile-avatar">
-          <img src={avatarUrl} alt={user.username} />
+        <div className="profile-avatar-wrapper">
+          <div className="profile-avatar" onClick={() => fileInputRef.current?.click()}>
+            <img src={avatarUrl} alt={user.username} />
+            {uploading && <div className="avatar-uploading">Загрузка...</div>}
+            <div className="avatar-overlay">
+              <span>📷</span>
+            </div>
+          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            onChange={handleAvatarUpload}
+            style={{ display: 'none' }}
+          />
+          <p className="avatar-hint">Нажмите на аватар, чтобы изменить</p>
         </div>
         <h1 className="profile-name">{user.username}</h1>
         <p className="profile-email">{user.email}</p>

@@ -1,12 +1,17 @@
 .feed-page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 100px 40px 40px;
+  box-sizing: border-box;
+  min-height: auto;
+  display: block;
 }
 
 .feed-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  width: 100%;
 }
 
 .feed-header h2 {
@@ -25,6 +30,8 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .feed-item {
@@ -110,17 +117,87 @@
   margin-bottom: 20px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .feed-page {
+    padding: 80px 20px 30px;
+  }
+
+  .feed-header h2 {
+    font-size: 1.6rem;
+  }
+
+  .feed-subtitle {
+    font-size: 0.85rem;
+  }
+
+  .feed-item {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .feed-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .feed-text {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .feed-page {
+    padding: 70px 12px 24px;
+  }
+
+  .feed-header {
+    margin-bottom: 28px;
+  }
+
+  .feed-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .feed-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .feed-list {
+    gap: 12px;
+  }
+
   .feed-item {
     flex-direction: column;
     text-align: center;
+    padding: 14px;
+    gap: 10px;
   }
-  
+
+  .feed-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
   .feed-text {
+    font-size: 0.85rem;
     text-align: center;
   }
-  
+
   .feed-date {
     text-align: center;
+    font-size: 0.65rem;
+  }
+
+  .empty-state {
+    padding: 40px 16px;
+  }
+
+  .empty-state p {
+    font-size: 0.9rem;
+  }
+
+  .primary-btn {
+    font-size: 0.8rem;
+    padding: 8px 16px;
   }
 }

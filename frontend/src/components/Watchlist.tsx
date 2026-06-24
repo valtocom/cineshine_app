@@ -41,14 +41,6 @@ const Watchlist: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ru-RU', {
-      day: 'numeric',
-      month: 'long'
-    });
-  };
-
   if (loading) return <div className="loading-spinner"></div>;
 
   return (
@@ -79,7 +71,6 @@ const Watchlist: React.FC = () => {
               <div className="watchlist-card__info">
                 <h3 className="watchlist-card__title">{item.title}</h3>
                 <p className="watchlist-card__year">{item.year}</p>
-                <p className="watchlist-card__date">Добавлен: {formatDate(item.added_at)}</p>
                 <button
                   className="remove-btn"
                   onClick={(e) => {
