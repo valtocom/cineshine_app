@@ -14,12 +14,7 @@
   align-items: center;
   height: 80px;
   box-sizing: border-box;
-}
-
-.navbar-left {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
+  gap: 0.5rem;
 }
 
 .navbar-brand {
@@ -33,12 +28,6 @@
   height: 110px;
   width: auto;
   flex-shrink: 0;
-}
-
-.navbar-right {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }
 
 .navbar-menu {
@@ -72,6 +61,29 @@
   font-family: inherit;
 }
 
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.badge {
+  position: absolute;
+  top: -8px;
+  right: -18px;
+  background: var(--accent);
+  color: #000;
+  font-size: 0.6rem;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 /* Бургер-кнопка */
 .burger-btn {
   display: none;
@@ -82,6 +94,7 @@
   cursor: pointer;
   padding: 8px;
   z-index: 1001;
+  margin-left: auto;
   flex-shrink: 0;
 }
 
@@ -106,7 +119,7 @@
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
-/* Адаптив для планшетов и мобильных */
+/* Адаптив */
 @media (max-width: 1024px) {
   .burger-btn {
     display: flex;
@@ -150,6 +163,13 @@
     cursor: pointer;
     font-family: inherit;
     font-size: 1.1rem;
+  }
+
+  .badge {
+    position: relative;
+    top: 0;
+    right: 0;
+    margin-left: 6px;
   }
 }
 

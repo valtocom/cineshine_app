@@ -31,7 +31,7 @@ const FriendRequests: React.FC = () => {
   const acceptRequest = async (requestId: number) => {
     try {
       await api.put(`/friends/request/${requestId}/accept`);
-      setRequests(requests.filter(r => r.id !== requestId));
+      window.location.reload(); // ← ПРОСТОЕ РЕШЕНИЕ
     } catch (err) {
       console.error(err);
     }
@@ -40,7 +40,7 @@ const FriendRequests: React.FC = () => {
   const declineRequest = async (requestId: number) => {
     try {
       await api.put(`/friends/request/${requestId}/decline`);
-      setRequests(requests.filter(r => r.id !== requestId));
+      window.location.reload(); // ← ПРОСТОЕ РЕШЕНИЕ
     } catch (err) {
       console.error(err);
     }

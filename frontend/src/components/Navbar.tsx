@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useFriendRequests } from '../hooks/useFriendRequests';
 import './Navbar.css';
 import logo from '../assets/cineshine.svg';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const { count } = useFriendRequests();
 
   const handleLogout = () => {  
     localStorage.removeItem('token');
@@ -13,39 +14,25 @@ const Navbar: React.FC = () => {
     navigate('/login');
   };
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const closeMenu = () => {
-    setIsOpen(false);
-  };
-
   return (
     <nav className="navbar">
-      <div className="navbar-left">
-        <Link to="/movies" className="navbar-brand" onClick={closeMenu}>
-          <img src={logo} alt="Cineshine" className="navbar-brand-logo" />
+      <Link to="/movies" className="navbar-brand">
+        <img src={logo} alt="Cineshine" className="navbar-brand-logo" />
+      </Link>
+      <div className="navbar-menu">
+        <Link to="/movies">Фильмы</Link>
+        <Link to="/recommendations">Рекомендации</Link>
+        <Link to="/friends">Друзья</Link>
+        <Link to="/friends/requests" className="nav-link">
+          Заявки
+          {count > 0 && (
+            <span className="badge">{count}</span>
+          )}
         </Link>
-      </div>
-
-      <div className="navbar-right">
-        <div className={`navbar-menu ${isOpen ? 'open' : ''}`}>
-          <Link to="/movies" onClick={closeMenu}>Фильмы</Link>
-          <Link to="/recommendations" onClick={closeMenu}>Рекомендации</Link>
-          <Link to="/friends" onClick={closeMenu}>Друзья</Link>
-          <Link to="/friends/requests" onClick={closeMenu}>Заявки</Link>
-          <Link to="/feed" onClick={closeMenu}>Лента</Link>
-          <Link to="/watchlist" onClick={closeMenu}>Буду смотреть</Link>
-          <Link to="/profile" onClick={closeMenu}>Профиль</Link>
-          <button onClick={() => { handleLogout(); closeMenu(); }}>Выйти</button>
-        </div>
-
-        <button className="burger-btn" onClick={toggleMenu} aria-label="Меню">
-          <span className={`burger-line ${isOpen ? 'active' : ''}`}></span>
-          <span className={`burger-line ${isOpen ? 'active' : ''}`}></span>
-          <span className={`burger-line ${isOpen ? 'active' : ''}`}></span>
-        </button>
+        <Link to="/feed">Лента</Link>
+        <Link to="/watchlist">Буду смотреть</Link>
+        <Link to="/profile">Профиль</Link>
+        <button onClick={handleLogout}>Выйти</button>
       </div>
     </nav>
   );

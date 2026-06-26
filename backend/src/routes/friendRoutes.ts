@@ -5,7 +5,9 @@ import {
   declineFriendRequest, 
   getFriends, 
   getPendingRequests, 
-  getFriendsFeed 
+  getPendingRequestsCount,
+  getFriendsFeed,
+  removeFriend  // НОВЫЙ ИМПОРТ
 } from '../controllers/friendController';
 import { authMiddleware } from '../middleware/authMiddleware';
 
@@ -18,6 +20,8 @@ router.put('/request/:requestId/accept', acceptFriendRequest);
 router.put('/request/:requestId/decline', declineFriendRequest);
 router.get('/', getFriends);
 router.get('/requests', getPendingRequests);
+router.get('/requests/count', getPendingRequestsCount);
 router.get('/feed', getFriendsFeed);
+router.delete('/:friendId', removeFriend); // НОВЫЙ МАРШРУТ
 
 export default router;
